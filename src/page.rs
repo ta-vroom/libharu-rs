@@ -223,7 +223,7 @@ impl<'a> Page<'a> {
             libharu_sys::HPDF_Page_GetCurrentFont(self.handle())
         };
 
-        if font == std::ptr::null_mut() {
+        if font.is_null() {
             anyhow::bail!("HPDF_Page_GetCurrentFont failed");
         }
 
@@ -251,7 +251,7 @@ impl<'a> Page<'a> {
 
     /// Calculate the byte length which can be included within the specified width.
     pub fn measure_text(&self, text: &str, width: Real, wordwrap: bool) -> anyhow::Result<(usize, Real)> {
-        let orig_text = text.clone();
+        let orig_text = <&str>::clone(&text);
         let text = CString::new(text)?;
         let wordwrap = match wordwrap {
             true => 1,
@@ -347,7 +347,7 @@ impl<'a> Page<'a> {
             libharu_sys::HPDF_Page_CreateDestination(self.handle())
         };
 
-        if dst == std::ptr::null_mut() {
+        if dst.is_null() {
             anyhow::bail!("HPDF_Page_CreateDestination failed");
         }
 

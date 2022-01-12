@@ -18,7 +18,7 @@ impl<'a> Outline<'a> {
     }
 
     /// Set whether this node is opened or not when the outline is displayed for the first time.
-    #[must_use]
+//    #[must_use]
     pub fn set_opened(&self, opened: bool) -> anyhow::Result<()> {
         let opened = match opened {
             true => libharu_sys::HPDF_TRUE,
@@ -37,7 +37,7 @@ impl<'a> Outline<'a> {
     }
     
     /// Set a destination object which becomes to a target to jump when the outline is clicked.
-    #[must_use]
+//    #[must_use]
     pub fn set_destination(&self, dst: &Destination) -> anyhow::Result<()> {
         let status = unsafe {
             libharu_sys::HPDF_Outline_SetDestination(self.handle(), dst.handle())

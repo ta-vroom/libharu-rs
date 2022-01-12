@@ -18,10 +18,8 @@ pub fn print_grid(doc: &Document, page: &PageDescriptionMode) -> anyhow::Result<
         if (y as u32) % 10 == 0 {
             page.set_line_width(0.5)?;
         }
-        else {
-            if page.line_width() != 0.25 {
-                page.set_line_width(0.25)?;
-            }
+        else if (page.line_width() - 0.25).abs() > f32::EPSILON {
+            page.set_line_width(0.25)?;
         }
 
         page.run_path_mode(|page|{
@@ -43,7 +41,7 @@ pub fn print_grid(doc: &Document, page: &PageDescriptionMode) -> anyhow::Result<
 
             page.set_gray_stroke(0.8)?;
         }
-        y = y + 5.0;
+        y += 5.0;
     }
 
     /* draw vertical lines */
@@ -52,10 +50,8 @@ pub fn print_grid(doc: &Document, page: &PageDescriptionMode) -> anyhow::Result<
         if ((x as u32) % 10) == 0 {
             page.set_line_width(0.5)?;
         }
-        else {
-            if page.line_width() != 0.25 {
-                page.set_line_width(0.25)?;
-            }
+        else if (page.line_width() - 0.25).abs() > f32::EPSILON {
+            page.set_line_width(0.25)?;
         }
 
         page.run_path_mode(|page|{
@@ -83,7 +79,7 @@ pub fn print_grid(doc: &Document, page: &PageDescriptionMode) -> anyhow::Result<
             page.set_gray_stroke(0.8)?;
         }
 
-        x = x + 5.0;
+        x += 5.0;
     }
 
     /* Draw horizontal text */
@@ -98,7 +94,7 @@ pub fn print_grid(doc: &Document, page: &PageDescriptionMode) -> anyhow::Result<
             })?;
         }
 
-        y = y + 5.0;
+        y += 5.0;
     }
 
     /* Draw virtical text */
@@ -119,7 +115,7 @@ pub fn print_grid(doc: &Document, page: &PageDescriptionMode) -> anyhow::Result<
             })?;
         }
 
-        x = x + 5.0;
+        x += 5.0;
     }
 
     page.set_gray_fill(0.0)?;

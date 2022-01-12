@@ -101,7 +101,7 @@ fn main() -> anyhow::Result<()> {
                 page.stroke()?;
                 Ok(())
             })?;
-            x_pos = x_pos + 30.0;
+            x_pos += 30.0;
         }
 
         const PAGE_HEIGHT:libharu::Real = 210.0;

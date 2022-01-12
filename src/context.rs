@@ -397,7 +397,7 @@ impl<'doc, 'page> PageDescriptionMode<'doc, 'page> {
         F: FnOnce(&PageTextMode) -> anyhow::Result<()>
     {
         self.begin_text()?;
-        let page = PageTextMode::new(&self.page);
+        let page = PageTextMode::new(self.page);
         let ret = f(&page);
         self.end_text()?;
 
@@ -420,15 +420,15 @@ impl<'doc, 'page> PageDescriptionMode<'doc, 'page> {
     where
         F: FnOnce(&PagePathMode) -> anyhow::Result<()>
     {
-        let page = PagePathMode::new(&self.page);
-        let ret = f(&page);
+        let page = PagePathMode::new(self.page);
+        
 
         // f()内のstroke(), fill()などの呼び出しでDESCRIPTIONモードに戻る。
         // 呼び忘れた場合にここでDESCRIPTIONモードに戻したいがうまくいかない。
         // end_pathだとすでにDESCRIPTIONモードだったときにGStateが壊れる。
         //let _ = self.end_path();
 
-        ret
+        f(&page)
     }
 }
 
@@ -441,13 +441,13 @@ impl<'doc, 'page> Deref for PageDescriptionMode<'doc, 'page> {
 
 impl<'doc, 'page> PageDescTeextCommonFunction<'doc> for PageDescriptionMode<'doc, 'page> {
     fn handle(&self) -> &Page {
-        &self.page
+        self.page
     }
 }
 
 impl<'doc, 'page> PageDescPathCommonFunction<'doc> for PageDescriptionMode<'doc, 'page> {
     fn handle(&self) -> &Page {
-        &self.page
+        self.page
     }
 }
 
@@ -500,6 +500,7 @@ impl<'doc, 'page> PageTextMode<'doc, 'page> {
     }
 
     /// Set text affine transformation matrix.
+    #[allow(clippy::many_single_char_names)]
     pub fn set_text_matrix(&self, a: Real, b: Real, c: Real, d: Real, x: Real, y: Real) -> anyhow::Result<()> {
         let status = unsafe {
             libharu_sys::HPDF_Page_SetTextMatrix(self.page.handle(), a, b, c, d, x, y)
@@ -622,7 +623,7 @@ impl<'doc, 'page> Deref for PageTextMode<'doc, 'page> {
 
 impl<'doc, 'page> PageDescTeextCommonFunction<'doc> for PageTextMode<'doc, 'page> {
     fn handle(&self) -> &Page {
-        &self.page
+        self.page
     }
 }
 

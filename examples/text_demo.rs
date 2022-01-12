@@ -1,6 +1,7 @@
 extern crate libharu;
 extern crate anyhow;
 
+use std::f32::consts::PI;
 use libharu::prelude::*;
 
 mod util;
@@ -18,7 +19,7 @@ fn show_stripe_pattern<T:Into<Point>>(page: &PageDescriptionMode, p: T) -> anyho
             page.stroke()?;
             Ok(())
         })?;
-        iy = iy + 3.0;
+        iy += 3.0;
     }
 
     Ok(())
@@ -99,7 +100,7 @@ fn main() -> anyhow::Result<()> {
             page.set_font_and_size(&font, 8.0)?;
             page.show_text(&format!("Fontsize={}", fsize))?;
     
-            fsize = fsize * 1.5;
+            fsize *= 1.5;
         }
         
         /* font color */
@@ -209,7 +210,7 @@ fn main() -> anyhow::Result<()> {
 
     /* Rotating text */
     let angle1 = 30.0; /* A rotation of 30 degrees. */
-    let rad1: Real = angle1 / 180.0 * 3.141592; /* Calcurate the radian value. */
+    let rad1: Real = angle1 / 180.0 * PI; /* Calcurate the radian value. */
 
     show_description(&page, 320.0, ypos - 60.0, "Rotating text")?;
     page.run_text_mode(|page| {
@@ -221,8 +222,8 @@ fn main() -> anyhow::Result<()> {
     /* skewing text */
     let angle1 = 10.0;
     let angle2 = 20.0;
-    let rad1: Real = angle1 / 180.0 * 3.141592;
-    let rad2: Real = angle2 / 180.0 * 3.141592;
+    let rad1: Real = angle1 / 180.0 * PI;
+    let rad2: Real = angle2 / 180.0 * PI;
     show_description(&page, 320.0, ypos - 120.0, "Skewing text")?;
     page.run_text_mode(|page| {
         page.set_text_matrix(1.0, rad1.tan(), rad2.tan(), 1.0, 320.0, ypos - 120.0)?;
