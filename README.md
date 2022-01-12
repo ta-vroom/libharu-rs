@@ -16,8 +16,8 @@ Rust binding for libharu(http://libharu.org/) PDF library.
 | HPDF_FreeDoc                | |
 | HPDF_FreeDocAll             | |
 | HPDF_SaveToFile             | Document::save_to_file |
-| HPDF_SaveToStream           | |
-| HPDF_GetStreamSize          | |
+| HPDF_SaveToStream           | Document::save_to_stream |
+| HPDF_GetStreamSize          | Document::get_stream_size |
 | HPDF_ReadFromStream         | |
 | HPDF_ResetStream            | |
 | HPDF_HasDoc                 | |
@@ -56,7 +56,7 @@ Rust binding for libharu(http://libharu.org/) PDF library.
 | HPDF_LoadRawImageFromFile2  | |
 | HPDF_LoadRawImageFromMem    | |
 | HPDF_LoadJpegImageFromFile  | |
-| HPDF_SetInfoAttr            | |
+| HPDF_SetInfoAttr            | Document::set_info_attr |
 | HPDF_GetInfoAttr            | |
 | HPDF_SetInfoDateAttr        | |
 | HPDF_SetPassword            | |

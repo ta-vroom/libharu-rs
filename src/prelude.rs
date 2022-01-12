@@ -3,6 +3,7 @@ pub use crate::document::{
     Document,
     PageNumStyle,
     CompressionMode,
+    Metadata,
     PageMode,
 };
 
