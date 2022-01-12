@@ -84,6 +84,38 @@ pub enum PageLayout {
     /// Display the pages in two column. The page of the odd number is displayed right.
     TwoColumnRight,
 }
+
+#[derive(Debug)]
+/// PDF Metadata
+pub enum Metadata {
+    /// Creation date of the document
+    CreationDate,
+
+    /// Last modified date
+    ModDate,
+
+    /// Document author
+    Author,
+
+    /// Document creator
+    Creator,
+
+    /// Document producer (default: Libharu)
+    Producer,
+
+    /// Document title
+    Title,
+
+    /// Document subject
+    Subject,
+
+    /// Document keywords
+    Keywords,
+    Trapped,
+
+    /// PDF Document version
+    PDFXVersion
+}
 // onerrorのクロージャをBoxで持ちたいためInnerを別にしている。
 // TODO: onerrorは必要か？
 struct DocumentInner {
@@ -116,7 +148,7 @@ impl Document {
             )
         };
         
-        if doc == std::ptr::null_mut() {
+        if doc.is_null() {
             anyhow::bail!("HPDF_New() failed");
         }
 
@@ -134,7 +166,7 @@ impl Document {
             libharu_sys::HPDF_AddPage(self.handle())
         };
 
-        if page == std::ptr::null_mut() {
+        if page.is_null() {
             anyhow::bail!("HPDF_AddPage failed");
         }
 
@@ -147,7 +179,7 @@ impl Document {
             libharu_sys::HPDF_GetCurrentPage(self.handle())
         };
 
-        if page == std::ptr::null_mut() {
+        if page.is_null() {
             anyhow::bail!("HPDF_GetCurrentPage failed");
         }
 
@@ -199,7 +231,7 @@ impl Document {
             libharu_sys::HPDF_InsertPage(self.handle(), target.handle())
         };
 
-        if page == std::ptr::null_mut() {
+        if page.is_null() {
             anyhow::bail!("HPDF_InsertPage failed");
         }
 
@@ -223,7 +255,7 @@ impl Document {
                 })
         };
 
-        if font == std::ptr::null_mut() {
+        if font.is_null() {
             anyhow::bail!("HPDF_GetFont failed");
         }
 
@@ -452,6 +484,28 @@ impl Document {
         Ok(())
     }
 
+    /// Save the current document to stream
+    pub fn save_to_stream(&self) -> anyhow::Result<()> {
+        let status = unsafe {
+            libharu_sys::HPDF_SaveToStream(self.handle())
+        };
+
+        if status != 0 {
+            anyhow::bail!("HPDF_SaveToFile failed (status = {})", status);
+        }
+
+        Ok(())
+    }
+
+    /// Get the size of the stream
+    pub fn get_stream_size(&self) -> anyhow::Result<u32> {
+        let size = unsafe {
+            libharu_sys::HPDF_GetStreamSize(self.handle())
+        };
+
+        Ok(size)
+    }
+
     /// Set the mode of compression.
     pub fn set_compression_mode(&self, mode: CompressionMode) -> anyhow::Result<()> {
         let status = unsafe {
@@ -484,7 +538,7 @@ impl Document {
             )
         };
 
-        if outline == std::ptr::null_mut() {
+        if outline.is_null() {
             anyhow::bail!("HPDF_CreateOutline failed");
         }
 
@@ -510,7 +564,7 @@ impl Document {
             )
         };
 
-        if outline == std::ptr::null_mut() {
+        if outline.is_null() {
             anyhow::bail!("HPDF_CreateOutline failed");
         }
 
@@ -524,7 +578,7 @@ impl Document {
             libharu_sys::HPDF_GetEncoder(self.handle(), encoding_name.as_ptr())
         };
 
-        if enc == std::ptr::null_mut() {
+        if enc.is_null() {
             anyhow::bail!("HPDF_GetEncoder failed");
         }
 
@@ -537,7 +591,7 @@ impl Document {
             libharu_sys::HPDF_GetCurrentEncoder(self.handle())
         };
 
-        if enc == std::ptr::null_mut() {
+        if enc.is_null() {
             anyhow::bail!("HPDF_GetCurrentEncoder failed");
         }
 
@@ -555,6 +609,33 @@ impl Document {
             anyhow::bail!("HPDF_SetCurrentEncoder failed (status={})", status);
         }
 
+        Ok(())
+    }
+
+    /// Set file attributes of the document object
+    pub fn set_file_attr(&self, attr: Metadata, value: &str) -> anyhow::Result<()> {
+        let attr_value = CString::new(value)?;
+
+        let info_type = match attr {
+            Metadata::CreationDate => libharu_sys::HPDF_InfoType::HPDF_INFO_CREATION_DATE,
+            Metadata::ModDate => libharu_sys::HPDF_InfoType::HPDF_INFO_MOD_DATE,
+            Metadata::Author => libharu_sys::HPDF_InfoType::HPDF_INFO_AUTHOR,
+            Metadata::Creator => libharu_sys::HPDF_InfoType::HPDF_INFO_CREATOR,
+            Metadata::Producer => libharu_sys::HPDF_InfoType::HPDF_INFO_PRODUCER,
+            Metadata::Title => libharu_sys::HPDF_InfoType::HPDF_INFO_TITLE,
+            Metadata::Subject => libharu_sys::HPDF_InfoType::HPDF_INFO_SUBJECT,
+            Metadata::Keywords => libharu_sys::HPDF_InfoType::HPDF_INFO_KEYWORDS,
+            Metadata::Trapped => libharu_sys::HPDF_InfoType::HPDF_INFO_TRAPPED,
+            Metadata::PDFXVersion => libharu_sys::HPDF_InfoType::HPDF_INFO_GTS_PDFX,
+        };
+
+        let status = unsafe {
+            libharu_sys::HPDF_SetInfoAttr(self.handle(), info_type, attr_value.as_ptr())
+        };
+
+        if status != 0 {
+            anyhow::bail!("HPDF_SetInfoAttr failed (status={}", status);
+        }
         Ok(())
     }
     
@@ -600,7 +681,7 @@ impl Document {
             libharu_sys::HPDF_LoadTTFontFromFile(self.handle(), name.as_ptr(), if embedding { 1 } else { 0 } )
         };
 
-        if ret == std::ptr::null_mut() {
+        if ret.is_null() {
             anyhow::bail!("HPDF_LoadTTFontFromFile failed");
         }
         
@@ -619,7 +700,7 @@ impl Document {
             libharu_sys::HPDF_LoadTTFontFromFile2(self.handle(), name.as_ptr(), index, if embedding { 1 } else { 0 } )
         };
 
-        if ret == std::ptr::null_mut() {
+        if ret.is_null() {
             anyhow::bail!("HPDF_LoadTTFontFromFile failed");
         }
         
@@ -637,7 +718,7 @@ impl Document {
             libharu_sys::HPDF_LoadPngImageFromFile(self.handle(), name.as_ptr())
         };
 
-        if image == std::ptr::null_mut() {
+        if image.is_null() {
             anyhow::bail!("HPDF_LoadPngImageFromFile failed");
         }
 
@@ -671,6 +752,7 @@ extern "C" fn onerror_callback(
     detailno: libharu_sys::HPDF_STATUS,
     userdata: libharu_sys::HPDF_HANDLE)
 {
+    #[allow(clippy::transmute_ptr_to_ref)]
     let inner: &mut DocumentInner = unsafe { std::mem::transmute(userdata) };
     inner.last_errno = errno;
     inner.last_detailno = detailno;
