@@ -102,6 +102,13 @@ impl From<(Real, Real, Real, Real)> for Rect {
     }
 }
 
+impl From<(Real, Real)> for Rect {
+    fn from(v: (Real, Real)) -> Self {
+        Self { left: v.0, top: v.1, right: v.0, bottom: v.1 }
+    }
+}
+
+
 /// Font handle type.
 pub struct Font<'a> {
     font: libharu_sys::HPDF_Font,
