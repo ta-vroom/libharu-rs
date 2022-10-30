@@ -134,17 +134,16 @@ pub struct Document {
 
 impl Document {
     /// Create a new instance of document.
-    pub fn new(onerror: impl Fn(Error) + 'static) -> anyhow::Result<Self>
-    {
+    pub fn new(onerror: impl Fn(Error) + 'static) -> anyhow::Result<Self> {
         let onerror = Box::new(onerror);
-        let mut inner = Box::new(DocumentInner{onerror, last_errno: 0, last_detailno: 0});
+        let mut inner = Box::new(DocumentInner {
+            onerror,
+            last_errno: 0,
+            last_detailno: 0,
+        });
 
-        let doc = unsafe {
-            libharu_sys::HPDF_New(
-                onerror_callback,
-                std::mem::transmute(inner.as_mut()),
-            )
-        };
+        let doc =
+            unsafe { libharu_sys::HPDF_New(onerror_callback, std::mem::transmute(inner.as_mut())) };
 
         if doc.is_null() {
             anyhow::bail!("HPDF_New() failed");
@@ -160,9 +159,7 @@ impl Document {
 
     /// Create a new page and adds it after the last page of a document.
     pub fn add_page(&self) -> anyhow::Result<Page> {
-        let page = unsafe {
-            libharu_sys::HPDF_AddPage(self.handle())
-        };
+        let page = unsafe { libharu_sys::HPDF_AddPage(self.handle()) };
 
         if page.is_null() {
             anyhow::bail!("HPDF_AddPage failed");
@@ -494,11 +491,14 @@ impl Document {
 
     /// Get the size of the stream
     pub fn get_stream_size(&self) -> anyhow::Result<u32> {
-        let size = unsafe {
-            libharu_sys::HPDF_GetStreamSize(self.handle())
-        };
+        let size = unsafe { libharu_sys::HPDF_GetStreamSize(self.handle()) };
 
         Ok(size)
+    }
+
+    pub fn read_from_stream(&self, buf: u8, size: u32) {
+        let pdf = unsafe {libharu_sys::HPDF_ReadFromStream(self.handle(), buf as *const u8, size)};
+        println!("{}", pdf);
     }
 
     /// Set the mode of compression.
