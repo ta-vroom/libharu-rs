@@ -500,7 +500,7 @@ impl Document {
     //     unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf as *const c_uchar, size) }
     // }
     pub fn get_contents(&self, buf: &[u8], size: u32) -> u32 {
-        unsafe {libharu_sys::HPDF_GetContents(self.handle(), buf, size)}
+        unsafe {libharu_sys::HPDF_GetContents(self.handle(), buf.as_ptr(), size)}
     }
     /// Set the mode of compression.
     pub fn set_compression_mode(&self, mode: CompressionMode) -> anyhow::Result<()> {
