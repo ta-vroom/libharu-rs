@@ -496,11 +496,12 @@ impl Document {
         Ok(size)
     }
 
-    pub fn read_from_stream(&self, buf: u8, size: u32) {
-        let pdf = unsafe {libharu_sys::HPDF_ReadFromStream(self.handle(), buf as *const u8, size)};
-        println!("{}", pdf);
+    pub fn read_from_stream(&self, buf: u8, size: u32) -> u32 {
+        unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf as *const u8, size) }
     }
-
+    pub fn get_contents(&self, buf: u8, size: u32) -> u32 {
+        unsafe {libharu_sys::HPDF_GetContents(self.handle(), buf as *const u8, size)}
+    }
     /// Set the mode of compression.
     pub fn set_compression_mode(&self, mode: CompressionMode) -> anyhow::Result<()> {
         let status = unsafe { libharu_sys::HPDF_SetCompressionMode(self.handle(), mode.bits()) };
