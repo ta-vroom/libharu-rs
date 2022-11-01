@@ -502,15 +502,19 @@ impl Document {
         }
         Ok(())
     }
-    pub fn read_from_stream(&self, buf: &[u8], size: u32) -> u32 {
-        unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf.as_ptr(), size) }
+    pub fn read_from_stream(&self, buf: &[u8], size: u32) -> anyhow::Result<()> {
+        let status = unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf.as_ptr(), size) };
+        if status != 0 {
+            anyhow::bail!("HPDF_SetCompressionMode failed (status = {})", status);
+        }
+        Ok(())
     }
-    pub fn get_contents(&self, buf: &[u8], size: u32) -> anyhow::Result<u32> {
+    pub fn get_contents(&self, buf: &[u8], size: u32) ->  anyhow::Result<()> {
         let status = unsafe {libharu_sys::HPDF_GetContents(self.handle(), buf.as_ptr(), size)};
         if status != 0 {
             anyhow::bail!("HPDF_SetCompressionMode failed (status = {}", status);
         }
-        Ok(status)
+        Ok(())
     }
     /// Set the mode of compression.
     pub fn set_compression_mode(&self, mode: CompressionMode) -> anyhow::Result<()> {
