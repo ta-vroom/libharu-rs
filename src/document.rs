@@ -495,7 +495,13 @@ impl Document {
 
         Ok(size)
     }
-
+    pub fn reset_stream(&self) -> anyhow::Result<()> {
+        let status = unsafe {libharu_sys::HPDF_ResetStream(self.handle())};
+        if status != 0 {
+            anyhow::bail!("HPDF_ResetStream failed (status = {}", status);
+        }
+        Ok(())
+    }
     pub fn read_from_stream(&self, buf: &[u8], size: u32) -> u32 {
         unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf.as_ptr(), size) }
     }
