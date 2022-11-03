@@ -503,14 +503,14 @@ impl Document {
         Ok(())
     }
     pub fn read_from_stream(&self, buf: &mut [u8], size: u32) -> anyhow::Result<()> {
-        let status = unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf.as_mut_ptr(), size) };
+        let status = unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), buf.as_mut_ptr(), size as *const u32) };
         if status != 0 {
             anyhow::bail!("HPDF_SetCompressionMode failed (status = {})", status);
         }
         Ok(())
     }
     pub fn get_contents(&self, buf: &mut [u8], size: u32) ->  anyhow::Result<()> {
-        let status = unsafe {libharu_sys::HPDF_GetContents(self.handle(), buf.as_mut_ptr(), size)};
+        let status = unsafe {libharu_sys::HPDF_GetContents(self.handle(), buf.as_mut_ptr(), size as *const u32)};
         if status != 0 {
             anyhow::bail!("HPDF_SetCompressionMode failed (status = {}", status);
         }
