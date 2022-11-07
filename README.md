@@ -2,6 +2,8 @@
 
 Rust binding for libharu(http://libharu.org/) PDF library.
 
+Note: For some probably good reason cargo was not working with my local repo.  
+
 
 ## API implementaion status
 
