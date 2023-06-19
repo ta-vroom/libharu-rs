@@ -77,9 +77,9 @@ Note: For some probably good reason cargo was not working with my local repo.
 | HPDF_Page_GetWidth              | Page::width |
 | HPDF_Page_GetHeight             | Page::height |
 | HPDF_Page_CreateDestination     | Page::create_destination |
-| HPDF_Page_CreateTextAnnot       | |
-| HPDF_Page_CreateLinkAnnot       | |
-| HPDF_Page_CreateURILinkAnnot    | |
+| HPDF_Page_CreateTextAnnot       | Page::text_annot |
+| HPDF_Page_CreateLinkAnnot       | Page::link_annot |
+| HPDF_Page_CreateURILinkAnnot    | Page::uri_link |
 | HPDF_Page_TextWidth             | Page::text_width |
 | HPDF_Page_MeasureText           | Page::measure_text / Page::measure_text_bytes |
 | HPDF_Page_GetGMode              | |
