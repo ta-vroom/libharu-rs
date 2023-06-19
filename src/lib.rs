@@ -1,14 +1,17 @@
 //! Rust binding of libharu PDF library.
-
 #![warn(missing_docs)]
-mod document;
-mod page;
-mod outline;
+
+use std::fmt::Debug;
+
+use libharu_sys::{HPDF_Point, HPDF_Rect};
+mod context;
 mod destination;
+mod document;
 mod encoder;
 mod error;
-mod context;
 mod image;
+mod outline;
+mod page;
 
 /// prelude
 pub mod prelude;
@@ -33,7 +36,11 @@ impl Copy for Color {}
 
 impl From<(Real, Real, Real)> for Color {
     fn from(v: (Real, Real, Real)) -> Self {
-        Self { red: v.0, green: v.1, blue: v.2 }
+        Self {
+            red: v.0,
+            green: v.1,
+            blue: v.2,
+        }
     }
 }
 
@@ -45,10 +52,10 @@ pub struct CmykColor {
 
     /// magenta (0.0 ~ 1.0)
     pub magenta: Real,
-    
+
     /// yellow (0.0 ~ 1.0)
     pub yellow: Real,
-    
+
     /// keyplate (0.0 ~ 1.0)
     pub keyplate: Real,
 }
@@ -57,7 +64,12 @@ impl Copy for CmykColor {}
 
 impl From<(Real, Real, Real, Real)> for CmykColor {
     fn from(v: (Real, Real, Real, Real)) -> Self {
-        Self { cyan: v.0, magenta: v.1, yellow: v.2, keyplate: v.3 }
+        Self {
+            cyan: v.0,
+            magenta: v.1,
+            yellow: v.2,
+            keyplate: v.3,
+        }
     }
 }
 /// Point
@@ -68,6 +80,12 @@ pub struct Point {
 
     /// y
     pub y: Real,
+}
+
+impl From<HPDF_Point> for Point {
+    fn from(v: HPDF_Point) -> Self {
+        Self { x: v.x, y: v.y }
+    }
 }
 
 impl Copy for Point {}
@@ -86,7 +104,7 @@ pub struct Rect {
 
     /// Top position
     pub top: Real,
-    
+
     /// Right position
     pub right: Real,
 
@@ -94,20 +112,40 @@ pub struct Rect {
     pub bottom: Real,
 }
 
+impl From<HPDF_Rect> for Rect {
+    fn from(v: HPDF_Rect) -> Self {
+        Self {
+            left: v.left,
+            top: v.top,
+            right: v.right,
+            bottom: v.bottom,
+        }
+    }
+}
+
 impl Copy for Rect {}
 
 impl From<(Real, Real, Real, Real)> for Rect {
     fn from(v: (Real, Real, Real, Real)) -> Self {
-        Self { left: v.0, top: v.1, right: v.2, bottom: v.3 }
+        Self {
+            left: v.0,
+            top: v.1,
+            right: v.2,
+            bottom: v.3,
+        }
     }
 }
 
 impl From<(Real, Real)> for Rect {
     fn from(v: (Real, Real)) -> Self {
-        Self { left: v.0, top: v.1, right: v.0, bottom: v.1 }
+        Self {
+            left: v.0,
+            top: v.1,
+            right: v.0,
+            bottom: v.1,
+        }
     }
 }
-
 
 /// Font handle type.
 pub struct Font<'a> {
@@ -134,5 +172,11 @@ impl<'a> Font<'a> {
 
             Ok(s)
         }
+    }
+}
+
+impl<'a> Debug for Font<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Font").field("font", &self.font).finish()
     }
 }

@@ -1,7 +1,9 @@
+use libharu_sys::HPDF_Rect;
+
 use crate::prelude::*;
 
 use std::ffi::CString;
-
+use std::ptr;
 
 ///Macro for CString::new()
 macro_rules! cstr {
@@ -165,18 +167,14 @@ impl<'a> Page<'a> {
 
     /// Get height of page.
     pub fn height(&self) -> anyhow::Result<Real> {
-        let ret = unsafe {
-            libharu_sys::HPDF_Page_GetHeight(self.handle())
-        };
+        let ret = unsafe { libharu_sys::HPDF_Page_GetHeight(self.handle()) };
 
         Ok(ret)
     }
 
     /// Set height of page.
     pub fn set_height(&self, val: Real) -> anyhow::Result<()> {
-        let status = unsafe {
-            libharu_sys::HPDF_Page_SetHeight(self.handle(), val)
-        };
+        let status = unsafe { libharu_sys::HPDF_Page_SetHeight(self.handle(), val) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_SetHeight failed (status={})", status);
@@ -187,18 +185,14 @@ impl<'a> Page<'a> {
 
     /// Get width of page.
     pub fn width(&self) -> anyhow::Result<Real> {
-        let ret = unsafe {
-            libharu_sys::HPDF_Page_GetWidth(self.handle())
-        };
+        let ret = unsafe { libharu_sys::HPDF_Page_GetWidth(self.handle()) };
 
         Ok(ret)
     }
 
     /// Set width of page.
     pub fn set_width(&self, val: Real) -> anyhow::Result<()> {
-        let status = unsafe {
-            libharu_sys::HPDF_Page_SetWidth(self.handle(), val)
-        };
+        let status = unsafe { libharu_sys::HPDF_Page_SetWidth(self.handle(), val) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_SetWidth failed (status={})", status);
@@ -209,16 +203,12 @@ impl<'a> Page<'a> {
 
     /// Get line width of page.
     pub fn line_width(&self) -> Real {
-        unsafe {
-            libharu_sys::HPDF_Page_GetLineWidth(self.handle())
-        }
+        unsafe { libharu_sys::HPDF_Page_GetLineWidth(self.handle()) }
     }
 
     /// Push the page's current graphics state to the stack.
     pub fn gsave(&self) -> anyhow::Result<()> {
-        let status = unsafe {
-            libharu_sys::HPDF_Page_GSave(self.handle())
-        };
+        let status = unsafe { libharu_sys::HPDF_Page_GSave(self.handle()) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_GSave failed (status={})", status);
@@ -229,9 +219,7 @@ impl<'a> Page<'a> {
 
     /// Pop the graphics state from the stack.
     pub fn grestore(&self) -> anyhow::Result<()> {
-        let status = unsafe {
-            libharu_sys::HPDF_Page_GRestore(self.handle())
-        };
+        let status = unsafe { libharu_sys::HPDF_Page_GRestore(self.handle()) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_GRestore failed (status={})", status);
@@ -242,9 +230,7 @@ impl<'a> Page<'a> {
 
     /// Gets the handle of the page's current font.
     pub fn current_font(&self) -> anyhow::Result<Font> {
-        let font = unsafe {
-            libharu_sys::HPDF_Page_GetCurrentFont(self.handle())
-        };
+        let font = unsafe { libharu_sys::HPDF_Page_GetCurrentFont(self.handle()) };
 
         if font.is_null() {
             anyhow::bail!("HPDF_Page_GetCurrentFont failed");
@@ -255,9 +241,7 @@ impl<'a> Page<'a> {
 
     /// Gets the size of the page's current font.
     pub fn current_font_size(&self) -> anyhow::Result<Real> {
-        let ret = unsafe {
-            libharu_sys::HPDF_Page_GetCurrentFontSize(self.handle())
-        };
+        let ret = unsafe { libharu_sys::HPDF_Page_GetCurrentFontSize(self.handle()) };
 
         Ok(ret)
     }
@@ -273,7 +257,12 @@ impl<'a> Page<'a> {
     }
 
     /// Calculate the byte length which can be included within the specified width.
-    pub fn measure_text(&self, text: &str, width: Real, wordwrap: bool) -> anyhow::Result<(usize, Real)> {
+    pub fn measure_text(
+        &self,
+        text: &str,
+        width: Real,
+        wordwrap: bool,
+    ) -> anyhow::Result<(usize, Real)> {
         let orig_text = <&str>::clone(&text);
         let text = CString::new(text)?;
         let wordwrap = match wordwrap {
@@ -283,7 +272,13 @@ impl<'a> Page<'a> {
 
         let mut real_width = 0.0;
         let ret = unsafe {
-            libharu_sys::HPDF_Page_MeasureText(self.handle(), text.as_ptr() as *const i8, width, wordwrap, &mut real_width)
+            libharu_sys::HPDF_Page_MeasureText(
+                self.handle(),
+                text.as_ptr() as *const i8,
+                width,
+                wordwrap,
+                &mut real_width,
+            )
         };
 
         /* calc UTF8 boundary */
@@ -291,15 +286,14 @@ impl<'a> Page<'a> {
         let ret = if !orig_text.is_char_boundary(ret) {
             let mut new_ret = 0;
             for i in 1..ret {
-                if orig_text.is_char_boundary(ret-i) {
+                if orig_text.is_char_boundary(ret - i) {
                     new_ret = ret - i;
                     break;
                 }
             }
 
             new_ret
-        }
-        else {
+        } else {
             ret
         };
 
@@ -307,7 +301,12 @@ impl<'a> Page<'a> {
     }
 
     /// Calculate the byte length which can be included within the specified width. (bytes data)
-    pub fn measure_text_bytes(&self, text: &[u8], width: Real, wordwrap: bool) -> anyhow::Result<(usize, Real)> {
+    pub fn measure_text_bytes(
+        &self,
+        text: &[u8],
+        width: Real,
+        wordwrap: bool,
+    ) -> anyhow::Result<(usize, Real)> {
         let text = CString::new(text)?;
         let wordwrap = match wordwrap {
             true => 1,
@@ -316,7 +315,13 @@ impl<'a> Page<'a> {
 
         let mut real_width = 0.0;
         let ret = unsafe {
-            libharu_sys::HPDF_Page_MeasureText(self.handle(), text.as_ptr() as *const i8, width, wordwrap, &mut real_width)
+            libharu_sys::HPDF_Page_MeasureText(
+                self.handle(),
+                text.as_ptr() as *const i8,
+                width,
+                wordwrap,
+                &mut real_width,
+            )
         };
 
         Ok((ret as usize, real_width))
@@ -324,28 +329,25 @@ impl<'a> Page<'a> {
 
     /// Get the current value of the page's line spacing.
     pub fn text_leading(&self) -> anyhow::Result<Real> {
-        let leading = unsafe {
-            libharu_sys::HPDF_Page_GetTextLeading(self.handle())
-        };
+        let leading = unsafe { libharu_sys::HPDF_Page_GetTextLeading(self.handle()) };
 
         Ok(leading)
-
     }
-    
+
     /// Get the current position for text showing.
     pub fn current_text_pos(&self) -> anyhow::Result<Point> {
-        let point = unsafe {
-            libharu_sys::HPDF_Page_GetCurrentTextPos(self.handle())
-        };
+        let point = unsafe { libharu_sys::HPDF_Page_GetCurrentTextPos(self.handle()) };
 
-        Ok(Point{x:point.x, y:point.y})
+        Ok(Point {
+            x: point.x,
+            y: point.y,
+        })
     }
 
     /// Clear the line dash pattern in the page.
     pub fn clear_dash(&self) -> anyhow::Result<()> {
-        let status = unsafe {
-            libharu_sys::HPDF_Page_SetDash(self.handle(), std::ptr::null_mut(), 0, 0)
-        };
+        let status =
+            unsafe { libharu_sys::HPDF_Page_SetDash(self.handle(), std::ptr::null_mut(), 0, 0) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_SetDash failed (status={})", status);
@@ -356,19 +358,18 @@ impl<'a> Page<'a> {
 
     /// Get current value of the page's filling color
     pub fn rgb_fill(&self) -> anyhow::Result<Color> {
-        let c = unsafe {
-            libharu_sys::HPDF_Page_GetRGBFill(self.handle())
-        };
+        let c = unsafe { libharu_sys::HPDF_Page_GetRGBFill(self.handle()) };
 
-        Ok(Color{ red: c.r, green: c.g, blue: c.b })
+        Ok(Color {
+            red: c.r,
+            green: c.g,
+            blue: c.b,
+        })
     }
-
 
     /// Create a new destination object for the page.
     pub fn create_destination(&self) -> anyhow::Result<Destination> {
-        let dst = unsafe {
-            libharu_sys::HPDF_Page_CreateDestination(self.handle())
-        };
+        let dst = unsafe { libharu_sys::HPDF_Page_CreateDestination(self.handle()) };
 
         if dst.is_null() {
             anyhow::bail!("HPDF_Page_CreateDestination failed");
@@ -376,7 +377,7 @@ impl<'a> Page<'a> {
 
         Ok(Destination::new(self, dst))
     }
-    
+
     pub fn text_annot<R>(&self, rect: R, text: &[u8]) -> anyhow::Result<()> where R: Into<HPDF_Rect>{
         unsafe {
             libharu_sys::HPDF_Page_CreateTextAnnot(
@@ -410,11 +411,8 @@ impl<'a> Page<'a> {
 
     /// Get the current position for path painting.
     pub fn current_pos(&self) -> anyhow::Result<Point> {
-        let point = unsafe {
-            libharu_sys::HPDF_Page_GetCurrentPos(self.handle())
-        };
-
-        Ok(Point{ x: point.x, y: point.y })
+        let point = unsafe { libharu_sys::HPDF_Page_GetCurrentPos(self.handle()) };
+        Ok(point.into())
     }
 
     /// Set the size and direction of a page to a predefined size.
@@ -433,15 +431,13 @@ impl<'a> Page<'a> {
             PageSize::US5x7 => libharu_sys::HPDF_PageSizes::HPDF_PAGE_SIZE_US5x7,
             PageSize::Comm10 => libharu_sys::HPDF_PageSizes::HPDF_PAGE_SIZE_COMM10,
         };
-        
+
         let direction = match direction {
             PageDirection::Portrait => libharu_sys::HPDF_PageDirection::HPDF_PAGE_PORTRAIT,
             PageDirection::Landscape => libharu_sys::HPDF_PageDirection::HPDF_PAGE_LANDSCAPE,
         };
 
-        let status = unsafe {
-            libharu_sys::HPDF_Page_SetSize(self.handle(), size, direction)
-        };
+        let status = unsafe { libharu_sys::HPDF_Page_SetSize(self.handle(), size, direction) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_SetSize failed (status={})", status);
@@ -452,9 +448,7 @@ impl<'a> Page<'a> {
 
     /// Set rotation angle of the page.
     pub fn set_rotate(&self, angle: u16) -> anyhow::Result<()> {
-        let status = unsafe {
-            libharu_sys::HPDF_Page_SetRotate(self.handle(), angle)
-        };
+        let status = unsafe { libharu_sys::HPDF_Page_SetRotate(self.handle(), angle) };
 
         if status != 0 {
             anyhow::bail!("HPDF_Page_SetRotate failed (status={})", status);
@@ -464,9 +458,15 @@ impl<'a> Page<'a> {
     }
 
     /// Show an image in one operation.
-    pub fn draw_image<T>(&self, img: &Image, pos: T, width: Real, height: Real) -> anyhow::Result<()>
+    pub fn draw_image<T>(
+        &self,
+        img: &Image,
+        pos: T,
+        width: Real,
+        height: Real,
+    ) -> anyhow::Result<()>
     where
-        T: Into<Point>
+        T: Into<Point>,
     {
         let pos = pos.into();
 
@@ -476,7 +476,9 @@ impl<'a> Page<'a> {
                 img.handle(),
                 pos.x,
                 pos.y,
-                width, height)
+                width,
+                height,
+            )
         };
 
         if status != 0 {
