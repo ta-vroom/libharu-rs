@@ -137,6 +137,14 @@ pub enum TextAlignment {
     Justify,
 }
 
+pub enum AnnotHighlight {
+    None,
+    InvertBox,
+    InvertBorder,
+    Down,
+    EOF
+}
+
 /// Page handle type.
 pub struct Page<'a> {
     page: libharu_sys::HPDF_Page,
@@ -369,6 +377,37 @@ impl<'a> Page<'a> {
         Ok(Destination::new(self, dst))
     }
     
+    pub fn text_annot<R>(&self, rect: R, text: &[u8]) -> anyhow::Result<()> where R: Into<HPDF_Rect>{
+        unsafe {
+            libharu_sys::HPDF_Page_CreateTextAnnot(
+                self.handle(),
+                rect.into(),
+                cstring!(text),
+                ptr::null_mut(),
+            )
+        };
+        Ok(())
+    }
+    pub fn link_annot<R>(&self, rect: R, dst: Page) -> anyhow::Result<()> where R: Into<HPDF_Rect> {
+        let dst = unsafe {libharu_sys::HPDF_Page_CreateDestination(dst.handle()) };
+        unsafe {libharu_sys::HPDF_Page_CreateLinkAnnot(self.handle(), rect.into(), dst)};
+        Ok(())
+    }
+
+    pub fn uri_link<'s, S>(&self, rect: Rect, uri: S) -> anyhow::Result<()> where S: Into<&'s str> + Clone{
+        let uri = uri.clone();
+        let rect = HPDF_Rect {
+            left: rect.left,
+            top: rect.top,
+            bottom: rect.bottom,
+            right: rect.right
+        };
+
+        let status = unsafe{libharu_sys::HPDF_Page_CreateURILinkAnnot(self.handle(), rect, cstring!(uri.into()))};
+        Ok(())
+    }
+
+
     /// Get the current position for path painting.
     pub fn current_pos(&self) -> anyhow::Result<Point> {
         let point = unsafe {
