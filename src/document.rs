@@ -47,7 +47,7 @@ bitflags! {
         const METADATA = 0x04;
 
         /// All stream datas are compressed. (The same as `CompressionMode::Text | CompressionMode::Image | CompressionMode::Metadata`)
-        const ALL = Self::TEXT.bits | Self::IMAGE.bits | Self::METADATA.bits;
+        const ALL = Self::TEXT.bits() | Self::IMAGE.bits() | Self::METADATA.bits();
     }
 }
 
