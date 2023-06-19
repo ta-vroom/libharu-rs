@@ -2,6 +2,21 @@ use crate::prelude::*;
 
 use std::ffi::CString;
 
+
+///Macro for CString::new()
+macro_rules! cstr {
+    ($fmt:expr) => {
+        CString::new($fmt).unwrap()
+    };
+}
+
+///Return the pointer of a CString
+macro_rules! cstring {
+    ($fmt:expr) => {
+        CString::new($fmt).unwrap().as_ptr()
+    };
+}
+
 /// The style of line-cap.
 #[derive(Debug)]
 pub enum LineCap {
