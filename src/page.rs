@@ -124,7 +124,7 @@ pub enum PageDirection {
 }
 
 /// Text alignment.
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum TextAlignment {
     /// Left alignment
     Left,
