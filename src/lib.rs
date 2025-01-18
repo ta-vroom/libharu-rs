@@ -19,6 +19,9 @@ pub mod prelude;
 /// Floating-point type used in libharu.
 pub type Real = libharu_sys::HPDF_REAL;
 
+/// Rectangle type used within libharu
+pub type Rectangle = HPDF_Rect;
+
 /// RGB color type.
 #[derive(Debug, Clone)]
 pub struct Color {
