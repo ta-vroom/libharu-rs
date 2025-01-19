@@ -1,8 +1,8 @@
-use libharu_sys::HPDF_Rect;
+use libharu_sys::{HPDF_AnnotHighlightMode, HPDF_Rect};
 
 use crate::prelude::*;
 
-use std::ffi::CString;
+use std::ffi::{c_void, CString};
 use std::ptr;
 
 ///Macro for CString::new()
@@ -139,12 +139,55 @@ pub enum TextAlignment {
     Justify,
 }
 
+pub struct Link(*mut c_void);
+
+pub enum HighlightMode {
+    NoHighlight,
+    InvertBox,
+    InvertBorder,
+    DownAppearance,
+    EoF,
+}
+
+impl From<HighlightMode> for HPDF_AnnotHighlightMode {
+    fn from(value: HighlightMode) -> Self {
+        use HPDF_AnnotHighlightMode::*;
+        use HighlightMode::*;
+        match value {
+            NoHighlight => HPDF_ANNOT_NO_HIGHTLIGHT,
+            InvertBox => HPDF_ANNOT_INVERT_BOX,
+            InvertBorder => HPDF_ANNOT_INVERT_BORDER,
+            DownAppearance => HPDF_ANNOT_DOWN_APPEARANCE,
+            EoF => HPDF_ANNOT_HIGHTLIGHT_MODE_EOF,
+        }
+    }
+}
+
+pub enum Annotate {
+    Highlight(HighlightMode),
+}
+
+// | HPDF_LinkAnnot_SetHighlightMode    | |
+// | HPDF_LinkAnnot_SetBorderStyle      | |
+// | HPDF_LinkAnnot_SetIcon             | |
+// | HPDF_LinkAnnot_SetOpened           | |
+
+impl Link {
+    pub fn annot<T>(self, mode: T) -> anyhow::Result<()>
+    where
+        T: Into<HPDF_AnnotHighlightMode>,
+    {
+        unsafe { libharu_sys::HPDF_LinkAnnot_SetHighlightMode(self.0, mode.into()) };
+        Ok(())
+    }
+}
+
 pub enum AnnotHighlight {
     None,
     InvertBox,
     InvertBorder,
     Down,
-    EOF
+    EOF,
 }
 
 /// Page handle type.
@@ -378,7 +421,10 @@ impl<'a> Page<'a> {
         Ok(Destination::new(self, dst))
     }
 
-    pub fn text_annot<R>(&self, rect: R, text: &[u8]) -> anyhow::Result<()> where R: Into<HPDF_Rect>{
+    pub fn text_annot<R>(&self, rect: R, text: &[u8]) -> anyhow::Result<()>
+    where
+        R: Into<HPDF_Rect>,
+    {
         unsafe {
             libharu_sys::HPDF_Page_CreateTextAnnot(
                 self.handle(),
@@ -389,25 +435,33 @@ impl<'a> Page<'a> {
         };
         Ok(())
     }
-    pub fn link_annot<R>(&self, rect: R, dst: Destination) -> anyhow::Result<()> where R: Into<HPDF_Rect> {
-        let dst = unsafe {libharu_sys::HPDF_Page_CreateDestination(dst.handle()) };
-        unsafe {libharu_sys::HPDF_Page_CreateLinkAnnot(self.handle(), rect.into(), dst)};
-        Ok(())
+    pub fn link_annot<R>(&self, rect: R, dst: Destination) -> anyhow::Result<Link>
+    where
+        R: Into<HPDF_Rect>,
+    {
+        let dst = unsafe { libharu_sys::HPDF_Page_CreateDestination(dst.handle()) };
+        Ok(Link(unsafe {
+            libharu_sys::HPDF_Page_CreateLinkAnnot(self.handle(), rect.into(), dst)
+        }))
     }
 
-    pub fn uri_link<'s, S>(&self, rect: Rect, uri: S) -> anyhow::Result<()> where S: Into<&'s str> + Clone{
+    pub fn uri_link<'s, S>(&self, rect: Rect, uri: S) -> anyhow::Result<()>
+    where
+        S: Into<&'s str> + Clone,
+    {
         let uri = uri.clone();
         let rect = HPDF_Rect {
             left: rect.left,
             top: rect.top,
             bottom: rect.bottom,
-            right: rect.right
+            right: rect.right,
         };
 
-        let status = unsafe{libharu_sys::HPDF_Page_CreateURILinkAnnot(self.handle(), rect, cstring!(uri.into()))};
+        let status = unsafe {
+            libharu_sys::HPDF_Page_CreateURILinkAnnot(self.handle(), rect, cstring!(uri.into()))
+        };
         Ok(())
     }
-
 
     /// Get the current position for path painting.
     pub fn current_pos(&self) -> anyhow::Result<Point> {
