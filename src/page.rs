@@ -1,4 +1,4 @@
-use libharu_sys::{HPDF_AnnotHighlightMode, HPDF_Rect};
+use libharu_sys::{HPDF_AnnotHighlightMode, HPDF_Page, HPDF_Page_MoveToNextLine, HPDF_Rect};
 
 use crate::prelude::*;
 
@@ -174,7 +174,7 @@ pub enum LinkBorder {
 // | HPDF_LinkAnnot_SetOpened           | |
 
 impl Link {
-    pub fn annot(self, mode: HighlightMode) -> anyhow::Result<()>
+    pub fn set_highlight_mode(self, mode: HighlightMode) -> anyhow::Result<()>
     {
         unsafe { libharu_sys::HPDF_LinkAnnot_SetHighlightMode(self.0, mode.into()) };
         Ok(())
@@ -548,4 +548,14 @@ impl<'a> Page<'a> {
 
         Ok(())
     }
+    // This works with PageDescription::new() -> page.runtextmode(|page| page.movetonextline())
+    // otherwise returns wronggmode
+    // pub fn next_line(&self) -> anyhow::Result<()> {
+    //     let status = unsafe { HPDF_Page_MoveToNextLine(self.handle()) };
+    //     eprintln!("{:?}", status);
+    //     if status != 0 {
+    //         anyhow::bail!("HPDF_Page_MoveToNextLine failed (status={})", status);
+    //     }
+    //     Ok(())
+    // }
 }
