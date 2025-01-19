@@ -162,9 +162,10 @@ impl From<HighlightMode> for HPDF_AnnotHighlightMode {
         }
     }
 }
-
-pub enum Annotate {
-    Highlight(HighlightMode),
+//Come back to this
+pub enum LinkBorder {
+    Dashed,
+    None
 }
 
 // | HPDF_LinkAnnot_SetHighlightMode    | |
@@ -176,6 +177,14 @@ impl Link {
     pub fn annot(self, mode: HighlightMode) -> anyhow::Result<()>
     {
         unsafe { libharu_sys::HPDF_LinkAnnot_SetHighlightMode(self.0, mode.into()) };
+        Ok(())
+    }
+    pub fn set_border_style(self, style: LinkBorder) -> anyhow::Result<()>
+    {
+        let width = 0.0;
+        let dash_on = 0;
+        let dash_off = 0;
+        unsafe { libharu_sys::HPDF_LinkAnnot_SetBorderStyle(self.0, width, dash_on, dash_off) };
         Ok(())
     }
 }

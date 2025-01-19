@@ -15,7 +15,8 @@ pub use crate::page::{
     PageSize,
     PageDirection,
     TextAlignment,
-    HighlightMode
+    HighlightMode,
+    LinkBorder
 };
 
 pub use crate::outline::{
