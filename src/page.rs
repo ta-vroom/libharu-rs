@@ -389,7 +389,7 @@ impl<'a> Page<'a> {
         };
         Ok(())
     }
-    pub fn link_annot<R>(&self, rect: R, dst: Page) -> anyhow::Result<()> where R: Into<HPDF_Rect> {
+    pub fn link_annot<R>(&self, rect: R, dst: Destination) -> anyhow::Result<()> where R: Into<HPDF_Rect> {
         let dst = unsafe {libharu_sys::HPDF_Page_CreateDestination(dst.handle()) };
         unsafe {libharu_sys::HPDF_Page_CreateLinkAnnot(self.handle(), rect.into(), dst)};
         Ok(())
