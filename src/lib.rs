@@ -19,8 +19,24 @@ pub mod prelude;
 /// Floating-point type used in libharu.
 pub type Real = libharu_sys::HPDF_REAL;
 
-/// Rectangle type used within libharu
-pub type Rectangle = HPDF_Rect;
+/// A lower-level representation of the rectangle type used in libharu
+/// Translates to `/Rect [ xLL yLL xUR yUR ]`
+#[derive(Default)]
+pub struct Rectangle {
+    pub lower_left: Point,
+    pub upper_right: Point,
+}
+
+impl From<Rectangle> for HPDF_Rect {
+    fn from(value: Rectangle) -> Self {
+        Self {
+            left: value.lower_left.x,
+            bottom: value.lower_left.y,
+            right: value.upper_right.x,
+            top: value.upper_right.y,
+        }
+    }
+}
 
 /// RGB color type.
 #[derive(Debug, Clone)]
@@ -76,7 +92,7 @@ impl From<(Real, Real, Real, Real)> for CmykColor {
     }
 }
 /// Point
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Point {
     /// x
     pub x: Real,
