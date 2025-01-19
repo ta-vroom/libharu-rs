@@ -10,7 +10,7 @@ use crate::Font;
 
 use bitflags::bitflags;
 use std::convert::TryInto;
-use std::ffi::{CString, c_uchar};
+use std::ffi::{c_uchar, CString};
 
 /// Page label style.
 #[derive(Debug)]
@@ -132,6 +132,28 @@ pub struct Document {
     inner: Box<DocumentInner>,
 }
 
+pub struct PageBuilder<'a> {
+    page: Page<'a>,
+}
+
+impl <'a> PageBuilder <'a> {
+    pub fn width(&mut self, width: f32) -> &mut PageBuilder<'a> {
+        self.page.set_width(width).unwrap();
+        self
+    }
+    pub fn height(&mut self, height: f32) -> &mut PageBuilder<'a> {
+        self.page.set_height(height).unwrap();
+        self
+    }
+    pub fn rotate(&mut self, rotation: u16) -> &mut PageBuilder<'a> {
+        self.page.set_rotate(rotation).unwrap();
+        self
+    }
+    pub fn build(self) -> Page<'a> {
+        self.page
+    }
+}
+
 impl Document {
     /// Create a new instance of document.
     pub fn new(onerror: impl Fn(Error) + 'static) -> anyhow::Result<Self> {
@@ -151,7 +173,12 @@ impl Document {
 
         Ok(Self { doc, inner })
     }
-
+    //Im wondering about adding a build page function
+    // pub fn build_page(&self) -> PageBuilder {
+    //     let ptr = unsafe { libharu_sys::HPDF_AddPage(self.handle()) };
+    //     let page = Page::new(self, ptr);
+    //     PageBuilder { page }
+    // }
     #[inline]
     pub(crate) fn handle(&self) -> libharu_sys::HPDF_Doc {
         self.doc
@@ -496,13 +523,13 @@ impl Document {
         Ok(size)
     }
     pub fn reset_stream(&self) -> anyhow::Result<()> {
-        let status = unsafe {libharu_sys::HPDF_ResetStream(self.handle())};
+        let status = unsafe { libharu_sys::HPDF_ResetStream(self.handle()) };
         if status != 0 {
             anyhow::bail!("HPDF_ResetStream failed (status = {}", status);
         }
         Ok(())
     }
-    pub fn read_from_stream(&self, buf: &mut [u8] , size: u32) -> anyhow::Result<()> {
+    pub fn read_from_stream(&self, buf: &mut [u8], size: u32) -> anyhow::Result<()> {
         let box_u32 = Box::into_raw(Box::new(size));
         let data = buf.as_mut_ptr();
         let status = unsafe { libharu_sys::HPDF_ReadFromStream(self.handle(), data, box_u32) };
@@ -512,10 +539,10 @@ impl Document {
         }
         Ok(())
     }
-    pub fn get_contents(&self, buf: &mut [u8], size: u32) ->  anyhow::Result<()> {
+    pub fn get_contents(&self, buf: &mut [u8], size: u32) -> anyhow::Result<()> {
         let box_u32 = Box::into_raw(Box::new(size));
         let data = buf.as_mut_ptr();
-        let status = unsafe {libharu_sys::HPDF_GetContents(self.handle(), data, box_u32)};
+        let status = unsafe { libharu_sys::HPDF_GetContents(self.handle(), data, box_u32) };
         if status != 0 {
             anyhow::bail!("HPDF_SetCompressionMode failed (status = {}", status);
         }
