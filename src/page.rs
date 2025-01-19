@@ -173,9 +173,7 @@ pub enum Annotate {
 // | HPDF_LinkAnnot_SetOpened           | |
 
 impl Link {
-    pub fn annot<T>(self, mode: T) -> anyhow::Result<()>
-    where
-        T: Into<HPDF_AnnotHighlightMode>,
+    pub fn annot(self, mode: HighlightMode) -> anyhow::Result<()>
     {
         unsafe { libharu_sys::HPDF_LinkAnnot_SetHighlightMode(self.0, mode.into()) };
         Ok(())
