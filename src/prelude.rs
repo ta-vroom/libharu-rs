@@ -39,6 +39,7 @@ pub use crate::context::{
     PageDescPathCommonFunction,
 };
 
+pub use crate::Rectangle;
 pub use crate::{
     Real,
     Color,
