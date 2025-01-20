@@ -529,6 +529,7 @@ impl Document {
         }
         Ok(())
     }
+    /// Read the pdf file from memory and saves it to the buffer. Requires a size, which can be gotten from get_stream_size
     pub fn read_from_stream(&self, buf: &mut [u8], size: u32) -> anyhow::Result<()> {
         let box_u32 = Box::into_raw(Box::new(size));
         let data = buf.as_mut_ptr();
