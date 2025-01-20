@@ -1,6 +1,5 @@
 extern crate anyhow;
 extern crate libharu;
-
 use libharu::{prelude::*, Rectangle}; //{Document};
 
 fn print_page(page: &Page, font: &Font<'_>, page_num: i32) {
@@ -28,7 +27,10 @@ fn main() {
 
     let mut pages = Vec::<Page>::new();
     let fname = "TEST.pdf";
-    let mut rect = Rectangle::default();
+    let mut rect = Rectangle {
+        lower_left: (5.0, 5.0).into(),
+        upper_right: (500.0, 500.0).into()
+    };
     let url = "http://libharu.org";
 
     /* create default-font */
@@ -62,17 +64,11 @@ fn main() {
         page.set_text_leading(23.0).unwrap();
         page.show_text("Jump to Page1 (HilightMode=HPDF_ANNOT_NO_HIGHTLIGHT)").unwrap();
         page.move_to_next_line().unwrap();
-        tp = page.current_pos().unwrap();
 
         Ok(())
     })
     .unwrap();
     /* page1 (HPDF_ANNOT_NO_HIGHTLIGHT) */
-
-    rect.lower_left.x = tp.x - 4.0;
-    rect.lower_left.y = tp.y - 4.0;
-    rect.upper_right.x = index_page.current_pos().unwrap().x + 4.0;
-    rect.upper_right.y = tp.y + 10.0;
 
     let dst = pages[0].create_destination().unwrap();
 

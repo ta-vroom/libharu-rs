@@ -165,7 +165,25 @@ impl From<HighlightMode> for HPDF_AnnotHighlightMode {
 //Come back to this
 pub enum LinkBorder {
     Dashed,
-    None
+    None,
+    Custom(BorderStyle),
+}
+
+impl From<LinkBorder> for BorderStyle {
+    fn from(value: LinkBorder) -> Self {
+        use LinkBorder::*;
+        match value {
+            Dashed => todo!(),
+            None => BorderStyle::default(),
+            Custom(border_style) => border_style,
+        }
+    }
+}
+#[derive(Default)]
+pub struct BorderStyle {
+    width: f32,
+    dash_on: u16,
+    dash_off: u16,
 }
 
 // | HPDF_LinkAnnot_SetHighlightMode    | |
@@ -174,17 +192,23 @@ pub enum LinkBorder {
 // | HPDF_LinkAnnot_SetOpened           | |
 
 impl Link {
-    pub fn set_highlight_mode(self, mode: HighlightMode) -> anyhow::Result<()>
-    {
-        unsafe { libharu_sys::HPDF_LinkAnnot_SetHighlightMode(self.0, mode.into()) };
+    pub fn set_highlight_mode(self, mode: HighlightMode) -> anyhow::Result<()> {
+        let status = unsafe { libharu_sys::HPDF_LinkAnnot_SetHighlightMode(self.0, mode.into()) };
         Ok(())
     }
-    pub fn set_border_style(self, style: LinkBorder) -> anyhow::Result<()>
+    pub fn set_border_style<T>(self, style: T) -> anyhow::Result<()>
+    where
+        T: Into<BorderStyle>,
     {
-        let width = 0.0;
-        let dash_on = 0;
-        let dash_off = 0;
-        unsafe { libharu_sys::HPDF_LinkAnnot_SetBorderStyle(self.0, width, dash_on, dash_off) };
+        let style: BorderStyle = style.into();
+        unsafe {
+            libharu_sys::HPDF_LinkAnnot_SetBorderStyle(
+                self.0,
+                style.width,
+                style.dash_on,
+                style.dash_off,
+            )
+        };
         Ok(())
     }
 }
@@ -424,7 +448,6 @@ impl<'a> Page<'a> {
         if dst.is_null() {
             anyhow::bail!("HPDF_Page_CreateDestination failed");
         }
-
         Ok(Destination::new(self, dst))
     }
 
@@ -446,9 +469,8 @@ impl<'a> Page<'a> {
     where
         R: Into<HPDF_Rect>,
     {
-        let dst = unsafe { libharu_sys::HPDF_Page_CreateDestination(dst.handle()) };
         Ok(Link(unsafe {
-            libharu_sys::HPDF_Page_CreateLinkAnnot(self.handle(), rect.into(), dst)
+            libharu_sys::HPDF_Page_CreateLinkAnnot(self.handle(), rect.into(), dst.handle())
         }))
     }
 
