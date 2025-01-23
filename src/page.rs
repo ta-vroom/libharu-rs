@@ -222,6 +222,7 @@ pub enum AnnotHighlight {
 }
 
 /// Page handle type.
+#[derive(Copy, Clone)]
 pub struct Page<'a> {
     page: libharu_sys::HPDF_Page,
     doc: &'a Document,
