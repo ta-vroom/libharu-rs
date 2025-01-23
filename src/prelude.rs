@@ -1,50 +1,22 @@
-
 pub use crate::document::{
-    Document,
-    PageNumStyle,
-    CompressionMode,
-    Metadata,
-    PageMode,
+    CompressionMode, Document, Metadata, PageBuilder, PageMode, PageNumStyle,
 };
 
 pub use crate::page::{
-    Page,
-    LineCap,
-    LineJoin,
-    TextRenderingMode,
-    PageSize,
-    PageDirection,
-    TextAlignment,
-    HighlightMode,
-    LinkBorder
+    BorderStyle, HighlightMode, LineCap, LineJoin, LinkBorder, Page, PageDirection, PageSize,
+    TextAlignment, TextRenderingMode,
 };
 
-pub use crate::outline::{
-    Outline,
-};
+pub use crate::outline::Outline;
 
-pub use crate::destination::{
-    Destination,
-};
+pub use crate::destination::Destination;
 
-pub use crate::image::{
-    Image,
-};
+pub use crate::image::Image;
 
 pub use crate::context::{
+    PageDescPathCommonFunction, PageDescTeextCommonFunction, PageDescriptionMode, PagePathMode,
     PageTextMode,
-    PagePathMode,
-    PageDescriptionMode,
-    PageDescTeextCommonFunction,
-    PageDescPathCommonFunction,
 };
 
 pub use crate::Rectangle;
-pub use crate::{
-    Real,
-    Color,
-    CmykColor,
-    Point,
-    Rect,
-    Font,
-};
+pub use crate::{CmykColor, Color, Font, Point, Real, Rect};
