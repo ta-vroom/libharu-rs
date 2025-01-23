@@ -181,9 +181,9 @@ impl From<LinkBorder> for BorderStyle {
 }
 #[derive(Default)]
 pub struct BorderStyle {
-    width: f32,
-    dash_on: u16,
-    dash_off: u16,
+    pub width: f32,
+    pub dash_on: u16,
+    pub dash_off: u16,
 }
 
 // | HPDF_LinkAnnot_SetHighlightMode    | |
