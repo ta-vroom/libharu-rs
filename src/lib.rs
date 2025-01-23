@@ -27,6 +27,89 @@ pub struct Rectangle {
     pub upper_right: Point,
 }
 
+enum Corner {
+    LowerLeft,
+    LowerRight,
+    UpperLeft,
+    UpperRight,
+}
+
+pub struct RectangleBuilder {
+    point: Point,
+    starting: Corner,
+    height: f32,
+    width: f32,
+}
+
+impl RectangleBuilder {
+    /// Define a starting point for the Rectangle
+    fn new(point: Point) -> Self {
+        Self {
+            point: Point::default(),
+            starting: Corner::LowerLeft,
+            height: 0.0,
+            width: 0.0,
+        }
+    }
+    /// Designate the starting corner
+    fn starting_corner(&mut self, corner: Corner) -> &mut Self {
+        self.starting = corner;
+        self
+    }
+
+    /// Set the width of the rectangle
+    fn set_width(&mut self, width: f32) -> &mut Self {
+        self.width = width;
+        self
+    }
+
+    /// Set the height of the rectangle
+    fn set_height(&mut self, height: f32) -> &mut Self {
+        self.height = height;
+        self
+    }
+
+    /// Build and return the rectangle
+    fn build(self) -> Rectangle {
+        match self.starting {
+            Corner::LowerLeft => Rectangle {
+                lower_left: self.point,
+                upper_right: Point {
+                    x: self.point.x + self.width,
+                    y: self.point.y + self.height,
+                },
+            },
+            Corner::LowerRight => Rectangle {
+                lower_left: Point {
+                    x: self.point.x - self.width,
+                    y: self.point.y,
+                },
+                upper_right: Point {
+                    x: self.point.x,
+                    y: self.point.y + self.height,
+                },
+            },
+            Corner::UpperLeft => Rectangle {
+                lower_left: Point {
+                    x: self.point.x,
+                    y: self.point.y - self.height,
+                },
+                upper_right: Point {
+                    x: self.point.x + self.width,
+                    y: self.point.y,
+                },
+            },
+            Corner::UpperRight => Rectangle {
+                lower_left: Point {
+                    x: self.point.x - self.width,
+                    y: self.point.y - self.height,
+                },
+                upper_right: self.point,
+            },
+        }
+    }
+}
+
 impl From<Rectangle> for HPDF_Rect {
     fn from(value: Rectangle) -> Self {
         Self {
