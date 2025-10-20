@@ -136,6 +136,16 @@ pub struct Color {
 
 impl Copy for Color {}
 
+impl Default for Color {
+    fn default() -> Self {
+        Self {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0
+        }
+    }
+}
+
 impl From<(Real, Real, Real)> for Color {
     fn from(v: (Real, Real, Real)) -> Self {
         Self {
