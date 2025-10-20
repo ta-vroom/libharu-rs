@@ -139,6 +139,11 @@ pub enum TextAlignment {
     Justify,
 }
 
+impl Default for TextAlignment {
+    fn default() -> Self {
+        TextAlignment::Left
+    }
+}
 pub struct Link(*mut c_void);
 
 pub enum HighlightMode {
