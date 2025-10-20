@@ -208,6 +208,14 @@ impl From<(Real, Real)> for Point {
     }
 }
 
+impl Point {
+    pub fn set<P>(&mut self, point: P) where P: Into<Point> {
+        let point = point.into();
+        self.x = point.x;
+        self.y = point.y;
+    }
+}
+
 /// Rect
 #[derive(Debug, Clone)]
 pub struct Rect {
